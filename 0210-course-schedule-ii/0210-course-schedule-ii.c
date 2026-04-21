@@ -1,0 +1,59 @@
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int* findOrder(int numCourses, int** prerequisites, int prerequisitesSize, int* prerequisitesColSize, int* returnSize) {
+    int* indegree = (int*)calloc(numCourses, sizeof(int));
+    int** graph = (int**)malloc(sizeof(int*) * numCourses);
+    int* graphSize = (int*)calloc(numCourses, sizeof(int));
+
+    for (int i = 0; i < numCourses; i++) {
+        graph[i] = (int*)malloc(sizeof(int) * prerequisitesSize);
+    }
+
+    for (int i = 0; i < prerequisitesSize; i++) {
+        int a = prerequisites[i][0];
+        int b = prerequisites[i][1];
+        graph[b][graphSize[b]++] = a;
+        indegree[a]++;
+    }
+
+    int* queue = (int*)malloc(sizeof(int) * numCourses);
+    int front = 0, rear = 0;
+
+    for (int i = 0; i < numCourses; i++) {
+        if (indegree[i] == 0)
+            queue[rear++] = i;
+    }
+
+    int* result = (int*)malloc(sizeof(int) * numCourses);
+    int count = 0;
+
+    while (front < rear) {
+        int curr = queue[front++];
+        result[count++] = curr;
+
+        for (int i = 0; i < graphSize[curr]; i++) {
+            int next = graph[curr][i];
+            indegree[next]--;
+            if (indegree[next] == 0)
+                queue[rear++] = next;
+        }
+    }
+
+    for (int i = 0; i < numCourses; i++) {
+        free(graph[i]);
+    }
+    free(graph);
+    free(graphSize);
+    free(indegree);
+    free(queue);
+
+    if (count != numCourses) {
+        *returnSize = 0;
+        free(result);
+        return (int*)malloc(0);
+    }
+
+    *returnSize = count;
+    return result;
+}
